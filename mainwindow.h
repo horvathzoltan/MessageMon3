@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPlainTextEdit>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -16,8 +17,11 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+    
+    static void SetMessage(const QString& msg);
 private:
     Ui::MainWindow *ui;
+
+    static QPlainTextEdit* _plainTextEdit;
 };
 #endif // MAINWINDOW_H
