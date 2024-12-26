@@ -16,7 +16,7 @@ public:
     static bool Init(const char *file = __FILE__);
     static QString GetTestFolderPath();
     static QString GetWorkingFolder();
-    static void SetTestMode(bool v){_isTest=v;};
+    static void SetTestMode(bool v){_isTest=v;}
 
     static QString GetLogFileName();
     static QString GetHomeFolder();

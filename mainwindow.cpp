@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QDateTime>
 #include <QRegularExpression>
 #include <QStyleFactory>
 
@@ -12,6 +13,7 @@ QPlainTextEdit* MainWindow::_plainTextEdit = nullptr;
 //QString MainWindow::_projectFolder = "";
 //QString MainWindow::_fileName = "";
 QString MainWindow::_filePath = "";
+QString MainWindow::_site = "";
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -40,20 +42,34 @@ void MainWindow::SetMessage(const QString &msg)
 
 void MainWindow::Log(const QString& str0)
 {
+    QDateTime now = QDateTime::currentDateTime();
+    QString format("yyyy.MM.dd. hh:mm.ss");
+    QString timestamp = now.toString(format);
+
+    QString logLevel = GetLogLevel(str0);
+
     QString str(str0);
     str.replace('<', "&lt;").replace('>', "&gt;");
 
     if(_filePath.isEmpty()){
         if(str0.startsWith("started")){
-            QString projectame = GetProjectName(str0);
-            QString projectFolder = FileNameHelper::GetLogFolder(projectame);
-            QString fileName = FileNameHelper::GetLogFileName();
-            _filePath = projectFolder+'/'+fileName;
+            ProjModel proj = GetProjectName(str0);
+            if(proj.projectName != QCoreApplication::applicationName())
+            {
+                _site = proj.site;
+                QString projectFolder = FileNameHelper::GetLogFolder(proj.projectName);
+                QString fileName = FileNameHelper::GetLogFileName();
+
+                bool isPath = FileHelper::MakePath(projectFolder);
+                if(isPath){
+                    _filePath = projectFolder+'/'+fileName;
+                }
+            }
         }
     }
 
     if(!_filePath.isEmpty()){
-        FileHelper::Save(str0,
+        FileHelper::Save(timestamp+';'+_site+';'+logLevel+';'+str0+'\n',
                          _filePath,
                          nullptr,
                          FileHelper::SaveModes::Append);
@@ -95,6 +111,14 @@ QString MainWindow::GetLogColor(const QString& str){
     if(str.startsWith("DEBUG:")) return "yellow";
     if(str.startsWith("TRACE:")) return "green";
     return "";
+}
+
+QString MainWindow::GetLogLevel(const QString& str){
+    if(str.startsWith("ERROR:")) return "error";
+    if(str.startsWith("WARNING:")) return "warning";
+    if(str.startsWith("DEBUG:")) return "debug";
+    if(str.startsWith("TRACE:")) return "trace";
+    return "info";
 }
 
 bool MainWindow::isDarkMode()
@@ -140,17 +164,22 @@ void MainWindow::SetDarkMode()
     qApp->setPalette(darkPalette);
 }
 
-QString MainWindow::GetProjectName(const QString &str)
+MainWindow::ProjModel MainWindow::GetProjectName(const QString &str)
 {
-    QRegularExpression r(R"((start[\w]*:)\s*([\w]+)+(?:\(([\d\.]*)\))?)");
+    QRegularExpression r(R"((start[\w]*)\s*([\w]+)+(?:\(([\d\.]*)\))?\s*as\s*([\w@]*))");
 
     QRegularExpressionMatch m = r.match(str);
 
+    ProjModel p;
+
     int lastCapturedIx = m.lastCapturedIndex();
     if(lastCapturedIx>=2){
-        return m.captured(2);
+        p.projectName= m.captured(2);
     }
-    return {};
+    if(lastCapturedIx>=4){
+        p.site= m.captured(4);
+    }
+    return p;
 }
 
 void MainWindow::on_pushButton_clicked()

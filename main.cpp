@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 
     //
     QString sysInfo = SysInfoHelper::Get_SysInfo();
-    Logger::Info("started:"+sysInfo);
+    Logger::Info("started "+sysInfo);
     //
     QString folder = FileNameHelper::GetHomeFolder();//GetWorkingFolder();
     QString fileName = FileNameHelper::GetLogFileName();

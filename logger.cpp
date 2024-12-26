@@ -10,6 +10,6 @@ void Logger::Info(const QString &msg)
     {
         _func(msg);
     } else{
-        qInfo()<<msg;
+        qDebug()<<msg;
     }
 }

@@ -66,7 +66,7 @@ QString FileNameHelper::GetLogFolder(const QString& projectName)
     auto home = GetHomeFolder();
     QString logFolder = QDir(home).filePath("logs");
     if(!projectName.isEmpty()){
-       logFolder = QDir(logFolder).filePath("projectName");
+       logFolder = QDir(logFolder).filePath(projectName);
     }
 
     return logFolder;

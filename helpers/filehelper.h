@@ -39,6 +39,7 @@ public:
         Overwrite, Append
     };
 
+    static bool MakePath(const QString& path);
     static bool Save(const QString& txt, const QString& filename, FileErrors *err, SaveModes isAppend);
 private:
     static void SetUtf8Encoding(QTextStream* st);

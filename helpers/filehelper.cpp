@@ -2,6 +2,7 @@
 #include "qdebug.h"
 //#include "helpers/logger.h"
 
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 
@@ -27,7 +28,7 @@ bool FileHelper::Validate_Load(const QString& filename, FileErrors *err)
 
     if(!fi.exists())
     {
-        if(_verbose) qInfo()<<QStringLiteral("file not exist: %1").arg(filename);
+        if(_verbose) qDebug()<<QStringLiteral("file not exist: %1").arg(filename);
         if(err != nullptr) *err= FileErrors::FileNotExists;
         return false;
     }
@@ -39,14 +40,14 @@ bool FileHelper::Validate_Save(const QString& filename, FileErrors *err)
 {
     if(filename.isEmpty())
     {
-        if(_verbose) qInfo()<<QStringLiteral("no file name").arg(filename);
+        if(_verbose) qDebug()<<QStringLiteral("no file name").arg(filename);
         if(err != nullptr) *err= FileErrors::NoFileName;
         return false;
     }
 
     if(filename.length()>256)
     {
-        if(_verbose) qInfo()<<QStringLiteral("filename too long: %1").arg(filename);
+        if(_verbose) qDebug()<<QStringLiteral("filename too long: %1").arg(filename);
         if(err!=nullptr) *err = FileErrors::FileNameTooLong;
         return false;
     }
@@ -55,7 +56,7 @@ bool FileHelper::Validate_Save(const QString& filename, FileErrors *err)
 
     if(!fi.isAbsolute())
     {
-        if(_verbose) qInfo()<<QStringLiteral("path is not absolute: %1").arg(filename);
+        if(_verbose) qDebug()<<QStringLiteral("path is not absolute: %1").arg(filename);
         if(err != nullptr) *err= FileErrors::PathIsNotAbsolute;
         return false;
     }
@@ -78,12 +79,12 @@ FileHelper::TXTLinesModel FileHelper::LoadLines(const QString& filename)
     bool ok = f.open(QFile::ReadOnly | QFile::Text);
 
     if(!ok){
-        if(_verbose) qInfo()<<QStringLiteral("cannot read file (%1): %2").arg(f.errorString(),filename);
+        if(_verbose) qDebug()<<QStringLiteral("cannot read file (%1): %2").arg(f.errorString(),filename);
         m.error= FileErrors::CannotRead;
         return m;
     }
 
-    if(_verbose) qInfo()<<QStringLiteral("LoadLines: %1").arg(filename);
+    if(_verbose) qDebug()<<QStringLiteral("LoadLines: %1").arg(filename);
     QTextStream st(&f);
     SetUtf8Encoding(&st);
 
@@ -134,6 +135,22 @@ QStringList FileHelper::LoadLines_reader(QTextStream *st){
         e << st->readLine();
     }
     return e;
+}
+
+bool FileHelper::MakePath(const QString &path)
+{
+    FileErrors err;
+    bool valid = Validate_Save(path, &err);
+    bool ok = false;
+    if(valid){
+        QDir d(path);
+        //if(d.exists()){
+        //    ok = true
+        //} else {
+            ok =d.mkpath(".");
+        //}
+    }
+    return ok;
 }
 
 // QList<QVarLengthArray<QString>> FileHelper::LoadCSV_reader(QTextStream *st, const QChar& separator){
@@ -218,12 +235,12 @@ bool FileHelper::Save(const QString& txt,
     bool opened = f.open(om);
 
     if (!opened){
-        if(_verbose) qInfo()<<QStringLiteral("cannot write file (%1): %2").arg(f.errorString(),filename);
+        if(_verbose) qDebug()<<QStringLiteral("cannot write file (%1): %2").arg(f.errorString(),filename);
         if(err != nullptr) *err= FileErrors::CannotWrite;
         return false;
     }
 
-    if(_verbose) qInfo()<<QStringLiteral("Save: %1").arg(filename);
+    if(_verbose) qDebug()<<QStringLiteral("Save: %1").arg(filename);
     QTextStream out(&f);
     SetUtf8Encoding(&out);
     out << txt;
