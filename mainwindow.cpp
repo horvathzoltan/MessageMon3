@@ -37,7 +37,7 @@ void MainWindow::SetMessage(const QString &msg)
 {
     if(!_plainTextEdit) return;
 
-    _plainTextEdit->appendPlainText(msg);
+    _plainTextEdit->appendHtml(msg);
 }
 
 void MainWindow::Log(const QString& str0)
