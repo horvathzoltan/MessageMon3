@@ -8,6 +8,20 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
+struct ClientSettings{
+protected:
+    QString _host;
+    int _port;
+
+public:
+    ClientSettings(){};
+    ClientSettings(const QString& h,int port);
+
+    QString host(){return _host;}
+    int port(){return _port;}
+    QString ToString_HostPort();
+};
+
 typedef bool (*RequestProcessor)(const QString&,const QChar& sep);
 typedef bool (ProcessRequest::*mRequestProcessor)(const QString&,const QChar& sep);
 
@@ -18,6 +32,7 @@ public:
     explicit Server(QObject *parent = 0);
     void SetRequestProcessor(RequestProcessor r){_requestProcessor = r;}
     void SetmRequestProcessor(mRequestProcessor r, ProcessRequest& pr){_mrequestProcessor = r; _pr = pr;}
+    QString ToString_HostPort(){return _settings.ToString_HostPort();}
 signals:
 
 public slots:
@@ -25,6 +40,9 @@ public slots:
 
 private:
     QTcpServer *_server;
+
+    ClientSettings _settings;
+
     bool _verbose = true;
     RequestProcessor _requestProcessor;
     mRequestProcessor _mrequestProcessor;

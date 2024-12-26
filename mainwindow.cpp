@@ -1,9 +1,17 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QRegularExpression>
 #include <QStyleFactory>
 
+#include <helpers/filehelper.h>
+#include <helpers/filenamehelper.h>
+
 QPlainTextEdit* MainWindow::_plainTextEdit = nullptr;
+//QString MainWindow::_projectame = "";
+//QString MainWindow::_projectFolder = "";
+//QString MainWindow::_fileName = "";
+QString MainWindow::_filePath = "";
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -34,6 +42,22 @@ void MainWindow::Log(const QString& str0)
 {
     QString str(str0);
     str.replace('<', "&lt;").replace('>', "&gt;");
+
+    if(_filePath.isEmpty()){
+        if(str0.startsWith("started")){
+            QString projectame = GetProjectName(str0);
+            QString projectFolder = FileNameHelper::GetLogFolder(projectame);
+            QString fileName = FileNameHelper::GetLogFileName();
+            _filePath = projectFolder+'/'+fileName;
+        }
+    }
+
+    if(!_filePath.isEmpty()){
+        FileHelper::Save(str0,
+                         _filePath,
+                         nullptr,
+                         FileHelper::SaveModes::Append);
+    }
 
     QString logColor = GetLogColor(str);
     int ix = str.indexOf(':');
@@ -115,3 +139,23 @@ void MainWindow::SetDarkMode()
 
     qApp->setPalette(darkPalette);
 }
+
+QString MainWindow::GetProjectName(const QString &str)
+{
+    QRegularExpression r(R"((start[\w]*:)\s*([\w]+)+(?:\(([\d\.]*)\))?)");
+
+    QRegularExpressionMatch m = r.match(str);
+
+    int lastCapturedIx = m.lastCapturedIndex();
+    if(lastCapturedIx>=2){
+        return m.captured(2);
+    }
+    return {};
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    ui->plainTextEdit->clear();
+}
+
+

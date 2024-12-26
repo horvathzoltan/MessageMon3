@@ -11,21 +11,19 @@ Server::Server(QObject *parent) :
 {
     _server = new QTcpServer(this);
 
+    QString ipAddress = GetIpAddress();
+    _settings = ClientSettings(ipAddress, 8081);
+
     connect(_server, SIGNAL(newConnection()), this, SLOT(newConnection()));
 
-    if(!_server->listen(QHostAddress::Any, 8081))
+    if(!_server->listen(QHostAddress::Any, _settings.port()))
     {
         Logger::Info("Server could not start!");
     }
     else
     {
-        QString ipAddress = GetIpAddress();
-
-        QString msg =
-            QStringLiteral("The server is running on %1:%2")
-                          .arg(ipAddress)
-                          .arg(_server->serverPort());
-
+        QString msg = QStringLiteral("The server is running on ")
+                      +_settings.ToString_HostPort();
         Logger::Info(msg);
     }
 }
@@ -91,3 +89,14 @@ QString Server::GetIpAddress()
     return ipAddress;
 }
 
+
+ClientSettings::ClientSettings(const QString &h, int port)
+{
+    _host = h;
+    _port = port;
+}
+
+QString ClientSettings::ToString_HostPort()
+{
+    return _host+":"+QString::number(_port);
+}
