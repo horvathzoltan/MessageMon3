@@ -28,6 +28,11 @@ MainWindow::MainWindow(QWidget *parent)
     //}
 }
 
+void MainWindow::Maximize()
+{
+    this->setWindowState(Qt::WindowMaximized); //Maximizes the window
+}
+
 MainWindow::~MainWindow()
 {
     delete ui;
@@ -129,6 +134,8 @@ bool MainWindow::isDarkMode()
     bool isDark = text.lightness() > window.lightness();
     return isDark;
 }
+
+
 
 void MainWindow::SetDarkMode()
 {

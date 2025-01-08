@@ -30,7 +30,8 @@ public:
     static QString GetLogLevel(const QString& str);
     static QString ColorizeLog2(const QString &str, const QString &c);
 
-    bool isDarkMode();    
+    bool isDarkMode();
+    void Maximize();
 private slots:
     void on_pushButton_clicked();
 
@@ -44,7 +45,7 @@ private:
     static QString _site;
 
     static QPlainTextEdit* _plainTextEdit;
-    void SetDarkMode();
-    static ProjModel GetProjectName(const QString &);
+    void SetDarkMode();    
+    static ProjModel GetProjectName(const QString &);        
 };
 #endif // MAINWINDOW_H
